@@ -25,62 +25,62 @@ class interpreter:
         self.mem=4096*[0]
         self.VF=0;
 
-    def AND(__self__):
+    def AND(self):
         pass
 
-    def LD(__self__):
+    def LD(self):
         pass
 
-    def SNE(__self__):
+    def SNE(self):
         pass
 
-    def XOR(__self__):
+    def XOR(self):
         pass
 
-    def SUB(__self__):
+    def SUB(self):
         pass
 
-    def SKNP(__self__):
+    def SKNP(self):
         pass
 
-    def JP(__self__):
+    def JP(self):
         pass
 
-    def SHR(__self__):
+    def SHR(self):
         pass
 
-    def RET(__self__):
+    def RET(self):
         pass
 
-    def RND(__self__):
+    def RND(self):
         pass
 
-    def SYS(__self__):
+    def SYS(self):
         pass
 
-    def ADD(__self__):
+    def ADD(self):
         pass
 
-    def CALL(__self__):
+    def CALL(self):
         pass
 
-    def SKP(__self__):
+    def SKP(self):
         pass
 
-    def SUBN(__self__):
+    def SUBN(self):
         pass
 
-    def SHL(__self__):
+    def SHL(self):
         pass
 
-    def OR(__self__):
+    def OR(self):
         pass
 
-    def SE(__self__):
+    def SE(self):
         pass
 
-    def CLS(__self__):
-        pass
+    def CLS(self):
+        self.scr.fill(black)
 
     # Draw on the screen a sprites
 
