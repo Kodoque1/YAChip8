@@ -24,18 +24,25 @@ class interpreter:
         self.scr=scr;
         self.mem=4096*[0]
         self.VF=0;
+        self.V= 16*[0]
+        self.pc=0;
+        self.sp=0;
 
-    def AND(self):
-        pass
+    def AND(self,reg0,reg1):
+        self.V[reg0] |= self.V[reg1]
 
-    def LD(self):
-        pass
+    def LD(self,reg,byte):
+        self.V[reg]=byte;
 
-    def SNE(self):
-        pass
+    def LD1(self,reg0,reg1):
+        self.V[reg0] = self.V[reg1];
 
-    def XOR(self):
-        pass
+    def SNE(self,reg,byte):
+        if self.V[reg] != byte:
+            self.pc+=1
+
+    def XOR(self,reg0,reg1):
+        self.V[reg0] ^= self.V[reg1]
 
     def SUB(self):
         pass
@@ -43,14 +50,15 @@ class interpreter:
     def SKNP(self):
         pass
 
-    def JP(self):
-        pass
+    def JP(self, addr):
+        self.pc = addr
 
     def SHR(self):
         pass
 
     def RET(self):
-        pass
+        self.pc=self.mem[self.sp]
+        self.sp-=1
 
     def RND(self):
         pass
@@ -58,11 +66,16 @@ class interpreter:
     def SYS(self):
         pass
 
-    def ADD(self):
-        pass
+    def ADD(self, reg, byte):
+        self.V[reg] += byte
 
-    def CALL(self):
-        pass
+    def ADD1(self, reg0, reg1):
+        self.V[reg0] += self.V[reg1]
+
+    def CALL(self,addr):
+        self.sp+=1
+        self.mem[self.sp]=self.pc
+        self.pc=addr
 
     def SKP(self):
         pass
@@ -73,11 +86,16 @@ class interpreter:
     def SHL(self):
         pass
 
-    def OR(self):
-        pass
+    def OR(self,reg0,reg1):
+        self.V[reg0] |= self.V[reg1]
 
-    def SE(self):
-        pass
+    def SE(self,reg,byte):
+        if self.V[reg] == byte:
+            self.pc+=1
+
+    def SE1(self,reg0,reg1):
+        if self.V[reg0] == self.V[reg1]:
+            self.pc+=1
 
     def CLS(self):
         self.scr.fill(black)
@@ -117,7 +135,7 @@ def main():
 
     for opcode in f.readlines():
         tmp = opcode.split()
-        getattr(new,tmp[0])(tmp[1:])
+        getattr(itrp,tmp[0])(tmp[1:])
 
 
 if __name__ == '__main__':
