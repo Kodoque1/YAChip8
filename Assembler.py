@@ -12,8 +12,8 @@ class assembler:
         self.out.write()
 
 def main():
-    f=open("rom.txt")
-    new=assembler()
+    f = open("rom.txt")
+    new = assembler()
     for opcode in f.readlines():
         tmp = opcode.split()
         getattr(new,tmp[0])(tmp[1:])

@@ -1,144 +1,46 @@
 import pygame
+import Screen
+import Mem
+import argparse
+import Cpu
 
-black = (0,0,0,255)
-white = (255,255,255,255)
-
-opcode_map = {
-    0xD : "DRW"
-}
-
-def get_nibbles(num):
-    return ((num >> 4 & 0xF),num  & 0xF)
-
-def get_nibbles_from_word(num):
-    return get_nibbles( num >> 8 & 0xFF) + get_nibbles(num & 0xff)
-
-def get_bits(byte):
-    for i in range(8):
-        yield (byte >> i) & 1
-
-class interpreter:
-    def __init__(self,scr):
-        self.regI=0;
-        self.reg1=0;
-        self.scr=scr;
-        self.mem=4096*[0]
-        self.VF=0;
-        self.V= 16*[0]
-        self.pc=0;
-        self.sp=0;
-
-    def AND(self,reg0,reg1):
-        self.V[reg0] |= self.V[reg1]
-
-    def LD(self,reg,byte):
-        self.V[reg]=byte;
-
-    def LD1(self,reg0,reg1):
-        self.V[reg0] = self.V[reg1];
-
-    def SNE(self,reg,byte):
-        if self.V[reg] != byte:
-            self.pc+=1
-
-    def XOR(self,reg0,reg1):
-        self.V[reg0] ^= self.V[reg1]
-
-    def SUB(self):
-        pass
-
-    def SKNP(self):
-        pass
-
-    def JP(self, addr):
-        self.pc = addr
-
-    def SHR(self):
-        pass
-
-    def RET(self):
-        self.pc=self.mem[self.sp]
-        self.sp-=1
-
-    def RND(self):
-        pass
-
-    def SYS(self):
-        pass
-
-    def ADD(self, reg, byte):
-        self.V[reg] += byte
-
-    def ADD1(self, reg0, reg1):
-        self.V[reg0] += self.V[reg1]
-
-    def CALL(self,addr):
-        self.sp+=1
-        self.mem[self.sp]=self.pc
-        self.pc=addr
-
-    def SKP(self):
-        pass
-
-    def SUBN(self):
-        pass
-
-    def SHL(self):
-        pass
-
-    def OR(self,reg0,reg1):
-        self.V[reg0] |= self.V[reg1]
-
-    def SE(self,reg,byte):
-        if self.V[reg] == byte:
-            self.pc+=1
-
-    def SE1(self,reg0,reg1):
-        if self.V[reg0] == self.V[reg1]:
-            self.pc+=1
-
-    def CLS(self):
-        self.scr.fill(black)
-
-    # Draw on the screen a sprites
-
-    def DRW(self,args):
-        x, y, n = args
-
-        for i in range(n):
-            byte = self.mem[self.regI + i]
-            for (idx,e) in enumerate(get_bits(byte)):
-                old_color = self.scr.get_at((x+idx,y+i))
-                new_color = white if (int(old_color==white) ^ e) else black
-
-                if old_color != new_color:
-                    self.VF=1
-
-                self.scr.set_at((x+idx, y+i), new_color)
-        pygame.display.update()
-
-
+TIMER = pygame.USEREVENT + 1
+# 60hz frequency
+DELAY_INTERVAL = 17
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Chip 8 Emulator.')
+    parser.add_argument('rom', type=str, help='Path to the rom')
+    parser.add_argument("width", type=int, help='Width of chip8 screen in pixel')
+    parser.add_argument("height", type=int, help='Width of chip8 screen in pixel')
+    parser.add_argument("delay", type=int, help='CPU frequency (give delay in milliseconds)')
+    parser.add_argument("sample", type=str, help='Path to the buzzer sound')
 
-    (width,height)=(64,32)
-    screen=pygame.display.set_mode((width, height))
-    pygame.display.flip()
+    args = parser.parse_args()
+    rom, width, height, sample = (args.rom, args.width, args.height, args.sample)
 
-    f=open("rom.txt")
-    itrp=interpreter(screen)
+    with open(rom, "rb") as f:
 
-    code=iter(f.readlines())
+        screen = Screen.Screen(width, height)
 
-    # Load code in memory
+        pygame.init()
+        pygame.time.set_timer(TIMER, DELAY_INTERVAL)
+        mem = Mem.Mem()
+        cpu = Cpu.Cpu(mem, f, screen, sample)
 
-    for opcode in f.readlines():
-        tmp = opcode.split()
-        getattr(itrp,tmp[0])(tmp[1:])
+        while cpu.running:
+            pygame.time.wait(args.delay)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    cpu.running = False
+                if event.type == pygame.KEYDOWN:
+                    print("Key pressed")
+                    cpu.key_pressed += [event]
+                if event.type == TIMER:
+                    cpu.decrement_counters()
+            cpu.execute()
 
 
 if __name__ == '__main__':
     main()
-
-
